@@ -20,10 +20,8 @@ Either version 2 of the License, or (at your option) any later version.
 #include <ctype.h>
 #include <syslog.h>
 #include "pdu.h"
-#include "smsd_cfg.h"
-#include "logging.h"
+#include "compat.h"
 #include "charset.h" // required for conversions of partial text content.
-#include "extras.h"
 
 #define MAX_ADDRESS_LENGTH 50
 #define MAX_SMSC_ADDRESS_LENGTH 30
@@ -327,9 +325,10 @@ void make_pdu(char* number, char* message, int messagelen, int alphabet, int fla
 
   // 3.1.12:
   *tmp_smsc = 0;
-  if (DEVICE.smsc_pdu && (smsc[0] || DEVICE.smsc[0]))
+
+  if (smsc != NULL && smsc[0])
   {
-    p = (smsc[0]) ? smsc : DEVICE.smsc;
+    p = smsc;
     while (*p == '+')
       p++;
     snprintf(tmp_smsc, sizeof(tmp_smsc), "%s", p);
@@ -1746,10 +1745,9 @@ int splitpdu(char *pdu, char *mode, int *alphabet, char *sendr, char *date, char
   return result;
 }
 
-int get_pdu_details(char *dest, size_t size_dest, char *pdu, int mnumber)
+int get_pdu_details(char *dest, size_t size_dest, char *pdu, int mnumber, char *mode)
 {
   int result = 0;
-  int udlen;
   int alphabet;
   char sender[100];
   char date[9];
@@ -1776,7 +1774,7 @@ int get_pdu_details(char *dest, size_t size_dest, char *pdu, int mnumber)
   char sort_ch;
   char *p;
 
-  udlen = splitpdu(pdu, DEVICE.mode, &alphabet, sender, date, time, ascii, smsc, &with_udh, udh_data, udh_type,
+  splitpdu(pdu, mode, &alphabet, sender, date, time, ascii, smsc, &with_udh, udh_data, udh_type,
                    &is_statusreport, &is_unsupported_pdu, from_toa, &report, &replace, warning_headers, &flash, bin_udh);
 
   if (is_unsupported_pdu)
@@ -1806,13 +1804,7 @@ int get_pdu_details(char *dest, size_t size_dest, char *pdu, int mnumber)
       while (strlen(sender) < length_sender)
         strcat(sender, " ");
 
-      if (DEVICE.priviledged_numbers[0])
-        p = DEVICE.priviledged_numbers;
-      else
-      if (priviledged_numbers[0])
-        p = priviledged_numbers;
-      else
-        p = 0;
+      p = 0;
 
       sort_ch = 'Z';
       if (p)

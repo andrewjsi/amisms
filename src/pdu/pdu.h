@@ -19,6 +19,10 @@ Either version 2 of the License, or (at your option) any later version.
 #define SIZE_WARNING_HEADERS 4096
 
 //Alphabet values: -1=GSM 0=ISO 1=binary 2=UCS2
+#define ALPHABET_GSM    -1
+#define ALPHABET_ISO    0
+#define ALPHABET_BINARY 1
+#define ALPHABET_UCS2   2
 
 #define NF_UNKNOWN 129
 #define NF_INTERNATIONAL 145
@@ -75,7 +79,7 @@ int explain_toa(char *dest, char *octet_char, int octet_int);
 
 void explain_status(char *dest, size_t size_dest, int status);
 
-int get_pdu_details(char *dest, size_t size_dest, char *pdu, int mnumber);
+int get_pdu_details(char *dest, size_t size_dest, char *pdu, int mnumber, char *mode);
 void sort_pdu_details(char *dest);
 
 int pdu2text(char *pdu, char *text, int *text_length, int *expected_length,
