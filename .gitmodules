@@ -1,0 +1,3 @@
+[submodule "libamievent"]
+	path = libamievent
+	url = ssh://git@git.jss.hu:44423/libamievent.git
