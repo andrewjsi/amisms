@@ -1,6 +1,7 @@
 CC = gcc
-CFLAGS = -Wall -I../libamievent -I../libamievent/libc-jss -I../pdu
+CFLAGS = -O2 -Wall -Wno-strict-aliasing
 # CFLAGS += -ggdb
+CFLAGS += -I../libamievent -I../libamievent/libc-jss -I../pdu
 LDFLAGS = -lev -lm
 
 OBJ += ../libamievent/libc-jss/netsocket.o
