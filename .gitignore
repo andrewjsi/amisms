@@ -1,0 +1,4 @@
+*.o
+*.swp
+Session.vim
+/src/sms
