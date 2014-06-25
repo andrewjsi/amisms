@@ -1,0 +1,3 @@
+At least one device must be specified in configuration!
+Default device not found: "device0"
+Parse error in config file: data/test.ini

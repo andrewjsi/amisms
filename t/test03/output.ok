@@ -1,0 +1,2 @@
+unknown config option "invalidname" in section "device0"
+Parse error in config file: data/test.ini

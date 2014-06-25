@@ -1,0 +1,14 @@
+default = device0
+
+device0
+	host     = localhost
+	port     = 5038
+	username = amiuser
+	password = amipassword
+	dongle   = dongle0
+another-mobile-provider
+	host     = localhost
+	port     = 5038
+	username = asterisk_ami_user
+	password = asterisk_ami_password
+	dongle   = dongle0
