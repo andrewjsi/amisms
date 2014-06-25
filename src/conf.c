@@ -12,30 +12,23 @@
 #include "debug.h"
 #include "ini/ini.h"
 #include "uthash.h"
-
-struct conf_device_t {
-    char device_name[64];   // config file [section] name
-    char host[64];
-    int port;
-    char username[64];
-    char password[64];
-    char dongle[64];
-    UT_hash_handle hh;  // makes this structure hashable with Troy D. Hanson's uthash.h
-};
-
-struct conf_root_t {
-    char default_device_name[64];   // default device to use
-};
+#include "conf.h"
 
 
 static char config_file[128];
-static struct conf_root_t *conf_root;
-static struct conf_device_t *conf_device_hash = NULL;       // hash head
+static struct conf_root_t *conf_root_struct;
+
+// device hash head
+static struct conf_device_t *conf_device_hash = NULL;
+
+// dummy hash item for mismatched search in conf_device()
+static const struct conf_device_t conf_device_hash_dummy;
+
 static int parse_error = 0;
 
 
 void conf_dump () {
-    printf("default = %s\n", conf_root->default_device_name);
+    printf("default = %s\n", conf_root_struct->default_device_name);
 
     printf("\n");
     struct conf_device_t *s, *tmp;
@@ -56,7 +49,7 @@ static int ini_handler (void *userdata, const char *section, const char *name, c
     // without any sections
     if (!strcmp(section, "")) {
         #undef CPY
-        #define CPY(h) strncpy(conf_root->h, value, sizeof(conf_root->h) - 1)
+        #define CPY(h) strncpy(conf_root_struct->h, value, sizeof(conf_root_struct->h) - 1)
         if (MATCH("default")) {
             CPY(default_device_name);
 
@@ -151,13 +144,13 @@ void config_check () {
     }
 
     // if no default device specified, then the first device to be default
-    if (!strlen(conf_root->default_device_name)) {
-        strncpy(conf_root->default_device_name, conf_device_hash->device_name, sizeof(conf_root->default_device_name) - 1);
+    if (!strlen(conf_root_struct->default_device_name)) {
+        strncpy(conf_root_struct->default_device_name, conf_device_hash->device_name, sizeof(conf_root_struct->default_device_name) - 1);
     }
 
-    HASH_FIND_STR(conf_device_hash, conf_root->default_device_name, s);
+    HASH_FIND_STR(conf_device_hash, conf_root_struct->default_device_name, s);
     if (s == NULL) {
-        printf("Default device not found: \"%s\"\n", conf_root->default_device_name);
+        printf("Default device not found: \"%s\"\n", conf_root_struct->default_device_name);
         parse_error = 1;
     }
 }
@@ -167,9 +160,9 @@ void conf_set_config_file (const char *file) {
 }
 
 void conf_unload () {
-    if (conf_root != NULL) {
-        free(conf_root);
-        conf_root = NULL;
+    if (conf_root_struct != NULL) {
+        free(conf_root_struct);
+        conf_root_struct = NULL;
     }
 
     if (conf_device_hash != NULL) {
@@ -184,8 +177,10 @@ void conf_unload () {
 
 int conf_load () {
     parse_error = 0;
-    conf_root = malloc(sizeof(*conf_root));
-    memset(conf_root, 0, sizeof(*conf_root));
+    conf_root_struct = malloc(sizeof(*conf_root_struct));
+    memset(conf_root_struct, 0, sizeof(*conf_root_struct));
+
+    // memset(&conf_device_hash_dummy, 0, sizeof(conf_device_hash_dummy));
 
     struct stat cstat;
     if (stat(config_file, &cstat)) {
@@ -220,5 +215,26 @@ int conf_load () {
 err:
     conf_unload();
     return -1;
+}
+
+const struct conf_root_t *conf_root () {
+    return conf_root_struct;
+}
+
+const struct conf_device_t *conf_device (const char *device_name) {
+    struct conf_device_t *item;
+    HASH_FIND_STR(conf_device_hash, device_name, item);
+
+    if (item == NULL)
+        return &conf_device_hash_dummy;
+    else
+        return item; // TODO: segfault veszély, ha nem létező device_name esetén a hívó nem kezeli a NULL eseményt
+}
+
+int conf_device_exists (const char *device_name) {
+    struct conf_device_t *item;
+    HASH_FIND_STR(conf_device_hash, device_name, item);
+
+    return (item == NULL) ? 0 : 1;
 }
 
