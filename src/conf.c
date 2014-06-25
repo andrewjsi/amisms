@@ -8,6 +8,7 @@
 
 #include <errno.h>
 #include <sys/stat.h>
+#include <wordexp.h>
 
 #include "debug.h"
 #include "ini/ini.h"
@@ -154,8 +155,18 @@ void config_check () {
     }
 }
 
-void conf_set_config_file (const char *file) {
-    strncpy(config_file, file, sizeof(config_file) - 1);
+void conf_set_config_file (const char *file_expression) {
+    wordexp_t p;
+
+    if (wordexp(file_expression, &p, WRDE_NOCMD)) {
+        printf("Config file name mismatch: \"%s\"\n", file_expression);
+        parse_error = 1;
+        config_file[0] = '\0'; // empty string
+        return;
+    }
+
+    strncpy(config_file, p.we_wordv[0], sizeof(config_file) - 1);
+    wordfree(&p);
 }
 
 void conf_unload () {

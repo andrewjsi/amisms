@@ -15,7 +15,7 @@ struct conf_root_t {
 };
 
 void conf_unload ();
-void conf_set_config_file (const char *file);
+void conf_set_config_file (const char *file_expression);
 int conf_load ();
 void conf_dump ();
 const struct conf_root_t *conf_root ();
