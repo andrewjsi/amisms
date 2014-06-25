@@ -193,11 +193,12 @@ int conf_load () {
         goto err;
     }
 
+    // permissions in octal, eg: "100644"
     char perm[7];
-    snprintf(perm, sizeof(perm), "%lo (octal)\n", (unsigned long) cstat.st_mode);
-    if (strcmp(perm, "100600")) {
-        printf("Config file is word-readable (mode %s)\n", perm);
-        printf("Please correct with \"chmod 600 %s\" command!\n", config_file);
+    snprintf(perm, sizeof(perm), "%lo", (unsigned long) cstat.st_mode);
+    if (perm[5] != '0') {
+        printf("Config file is world-readable (mode %s)\n", perm);
+        printf("Please correct with \"chmod o= %s\" command!\n", config_file);
         goto err;
     }
 
