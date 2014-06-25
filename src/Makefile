@@ -4,6 +4,7 @@ CFLAGS = -O2 -Wall -Wno-strict-aliasing
 CFLAGS += -I../libamievent -I../libamievent/libc-jss -I../pdu
 LDFLAGS = -lev -lm
 
+OBJ += ../libamievent/libc-jss/ini/ini.o
 OBJ += ../libamievent/libc-jss/netsocket.o
 OBJ += ../libamievent/libc-jss/logger.o
 OBJ += ../libamievent/libc-jss/misc.o
@@ -12,6 +13,7 @@ OBJ += pdu/charset.o
 OBJ += pdu/compat.o
 OBJ += pdu/pdu.o
 OBJ += banner.o
+OBJ += conf.o
 PROGS=sms
 
 .PHONY: all
