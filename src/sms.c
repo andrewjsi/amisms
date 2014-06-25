@@ -10,6 +10,7 @@
 #include <ctype.h>
 
 #include "ami.h"
+#include "conf.h"
 #include "pdu/pdu.h"
 #include "debug.h"
 #include "misc.h"
@@ -18,14 +19,18 @@
 
 #include "banner.h"
 
+#define DEFAULT_CONFIG_FILE "~/.smsrc"
+
+/*****************************************************************************/
+
 char phone_number[128];
 char text[1024];
 ami_t *ami;
-
 int option_flash_sms = 0;
-char *option_config_file = "~/.smsrc";
-
 char my_basename[64];
+char *selected_device;
+
+/*****************************************************************************/
 
 void quit (int code) {
     exit(code);
@@ -135,6 +140,13 @@ void read_text_from_stdin () {
 int main (int argc, char *argv[]) {
     strncpy(my_basename, basename(argv[0]), sizeof(my_basename) - 1);
 
+    // config file set to default
+    conf_set_config_file(DEFAULT_CONFIG_FILE);
+
+    // config file set to SMSAMI_CONFIG environment variable, if exists
+    if (getenv("SMSAMI_CONFIG"))
+        conf_set_config_file(getenv("SMSAMI_CONFIG"));
+
     int c;
     opterr = 0;
     while ((c = getopt (argc, argv, "fc:")) != -1) {
@@ -142,8 +154,10 @@ int main (int argc, char *argv[]) {
             case 'f':
                 option_flash_sms = 1;
                 break;
+
             case 'c':
-                option_config_file = optarg;
+                // config file set to argument
+                conf_set_config_file(optarg);
                 break;
 
             case '?':
@@ -174,7 +188,12 @@ int main (int argc, char *argv[]) {
         read_text_from_stdin();
     }
 
+    // 160 karakternél levágjuk a stringet. Ez majd megszűnik, ha rendben lesz
+    // a PDU és a multi-part SMS
     text[160] = '\0';
+
+    if (conf_load())
+        return 1;
 
     ami = ami_new(EV_DEFAULT);
     if (ami == NULL) {
