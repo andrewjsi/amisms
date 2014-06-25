@@ -28,7 +28,7 @@ char text[1024];
 ami_t *ami;
 int option_flash_sms = 0;
 char my_basename[64];
-char *selected_device;
+const char *selected_device = NULL;
 
 /*****************************************************************************/
 
@@ -92,8 +92,9 @@ void convert_and_send_sms () {
     con_debug("Sending DongleSendPDU action with PDU \"%s\"", pdu);
     ami_action(ami, response_donglesendpdu, NULL,
         "Action: DongleSendPDU\n"
-        "Device: dongle0\n"
+        "Device: %s\n"
         "PDU: %s\n"
+        , conf_device(selected_device)->dongle
         , pdu
     );
 }
@@ -195,13 +196,27 @@ int main (int argc, char *argv[]) {
     if (conf_load())
         return 1;
 
+    if (selected_device == NULL)
+        selected_device = conf_root()->default_device_name;
+
+    if (!conf_device_exists(selected_device)) {
+        printf("Device \"%s\" not found in configuration!\n", selected_device);
+        return 1;
+    }
+
     ami = ami_new(EV_DEFAULT);
     if (ami == NULL) {
         con_debug("ami_new() returned NULL");
         return 1;
     }
 
-    ami_credentials(ami, "jsi", "pwd", "localhost", "5038");
+    ami_credentials(ami,
+        conf_device(selected_device)->username,
+        conf_device(selected_device)->password,
+        conf_device(selected_device)->host,
+        conf_device(selected_device)->port
+    );
+
     ami_event_register(ami, event_disconnect, NULL, "Disconnect");
     ami_event_register(ami, event_connect, NULL, "Connect");
     ami_connect(ami);
