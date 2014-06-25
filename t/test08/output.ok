@@ -2,6 +2,6 @@ Loading config ...
 default device name = device0
 default's port = 5038
 default's username = amiuser
-port of non-existent device = 0
+port of non-existent device = 
 host of non-existent device = 
 Done

@@ -35,7 +35,7 @@ void conf_dump () {
     HASH_ITER(hh, conf_device_hash, s, tmp) {
         printf("%s\n", s->device_name);
         printf("\thost     = %s\n", s->host);
-        printf("\tport     = %d\n", s->port);
+        printf("\tport     = %s\n", s->port);
         printf("\tusername = %s\n", s->username);
         printf("\tpassword = %s\n", s->password);
         printf("\tdongle   = %s\n", s->dongle);
@@ -80,8 +80,7 @@ static int ini_handler (void *userdata, const char *section, const char *name, c
             CPY(host);
 
         } else if (MATCH("port")) {
-            if (value)
-                item->port = atoi(value);
+            CPY(port);
 
         } else if (MATCH("username")) {
             CPY(username);
@@ -114,11 +113,11 @@ void config_check () {
             strcpy(s->host, "localhost");
         }
 
-        if (s->port == 0)
-            s->port = 5038;
+        if (!strlen(s->port))
+            strcpy(s->port, "5038");
 
-        if (s->port < 1 || s->port > 65534) {
-            printf("unknown port \"%d\" in device \"%s\"\n", s->port, s->device_name);
+        if (atoi(s->port) < 1 || atoi(s->port) > 65534) {
+            printf("unknown port \"%s\" in device \"%s\"\n", s->port, s->device_name);
             parse_error = 1;
         }
 

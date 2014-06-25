@@ -3,7 +3,7 @@
 struct conf_device_t {
     char device_name[64];   // config file [section] name
     char host[64];
-    int port;
+    char port[8];
     char username[64];
     char password[64];
     char dongle[64];
