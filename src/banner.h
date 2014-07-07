@@ -1,2 +1,2 @@
-void help (char *fmt, ...);
+void usage (char *fmt, ...);
 

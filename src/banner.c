@@ -11,7 +11,7 @@ static void print_logo () {
     );
 }
 
-void help (char *fmt, ...) {
+void usage (char *fmt, ...) {
     print_logo();
     if (fmt != NULL) {
         va_list ap;

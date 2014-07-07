@@ -163,20 +163,20 @@ int main (int argc, char *argv[]) {
 
             case '?':
                 if (optopt == 'c')
-                    help("Option -c need config file name!");
+                    usage("Option -c need config file name!");
                 else if (isprint (optopt))
-                    help("Unknown option `-%c'", optopt);
+                    usage("Unknown option `-%c'", optopt);
                 else
-                    help("Unknown option character `\\x%x'", optopt);
+                    usage("Unknown option character `\\x%x'", optopt);
 
             default:
-                help(NULL);
+                usage(NULL);
                 break;
         }
     }
 
     if (argc - optind < 2) {
-        help(NULL);
+        usage(NULL);
         quit(-1);
     }
 
