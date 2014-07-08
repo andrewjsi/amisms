@@ -1,2 +1,0 @@
-void usage (char *fmt, ...);
-

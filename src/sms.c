@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include <libgen.h>     // basename()
 #include <ctype.h>
 
 #include "ami.h"
@@ -14,20 +13,19 @@
 #include "pdu/pdu.h"
 #include "debug.h"
 #include "misc.h"
+
+#ifdef DEBUG
 #define CON_DEBUG
+#endif
 #include "logger.h"
 
-#include "banner.h"
+#include "option.h"
 
 #define DEFAULT_CONFIG_FILE "~/.smsrc"
 
 /*****************************************************************************/
 
-char phone_number[128];
-char text[1024];
 ami_t *ami;
-int option_flash_sms = 0;
-char my_basename[64];
 const char *selected_device = NULL;
 
 /*****************************************************************************/
@@ -77,16 +75,15 @@ void convert_and_send_sms () {
     // wide-char (max 70 char).
     // alphabet = ALPHABET_UCS2;
 
-    int flash_sms = option_flash_sms; // FLASH
     int report = 0;
     int with_udh = 0;
     char *udh_data = "";
 
-    con_debug("phone_number = \"%s\", text=\"%s\"", phone_number, text);
+    con_debug("phone_number = \"%s\", message_text=\"%s\"", option.phone_number, option.message_text);
     char pdu[4096];
 
     make_pdu(
-        phone_number, text, strlen(text), alphabet, flash_sms,
+        option.phone_number, option.message_text, strlen(option.message_text), alphabet, option.flash,
         report, with_udh, udh_data, "new", pdu, 1440, 0, 0, 0, NULL);
 
     con_debug("Sending DongleSendPDU action with PDU \"%s\"", pdu);
@@ -118,28 +115,11 @@ void event_connect (ami_event_t *event) {
     convert_and_send_sms();
 }
 
-// STDIN-ről beolvasása EOF-ig. A sorokat összefűzi és a text stringbe menti,
-// vigyázva a text string hosszára
-void read_text_from_stdin () {
-    char *line = NULL;  // ideiglenes buffer a getline-nak
-    size_t len = 0;
-    ssize_t read;
-    int remaining_size; // text stringbe még ennyi byte fér el
-
-    remaining_size = sizeof(text) - 1;
-
-    while ((read = getline(&line, &len, stdin)) != -1) {
-        strncat(text, line, remaining_size);
-        remaining_size -= read;
-        if (remaining_size <= 0)
-            break;
-    }
-    chomp(text); // utolsó \n karakter chompolása
-    free(line);
-}
-
 int main (int argc, char *argv[]) {
-    strncpy(my_basename, basename(argv[0]), sizeof(my_basename) - 1);
+    option_set_basename(argv[0]);
+
+    // parse command-line arguments and save to option structure (in option.h)
+    option_parse_args(argc, argv);
 
     // config file set to default
     conf_set_config_file(DEFAULT_CONFIG_FILE);
@@ -148,50 +128,13 @@ int main (int argc, char *argv[]) {
     if (getenv("SMSAMI_CONFIG"))
         conf_set_config_file(getenv("SMSAMI_CONFIG"));
 
-    int c;
-    opterr = 0;
-    while ((c = getopt (argc, argv, "fc:")) != -1) {
-        switch (c) {
-            case 'f':
-                option_flash_sms = 1;
-                break;
-
-            case 'c':
-                // config file set to argument
-                conf_set_config_file(optarg);
-                break;
-
-            case '?':
-                if (optopt == 'c')
-                    usage("Option -c need config file name!");
-                else if (isprint (optopt))
-                    usage("Unknown option `-%c'", optopt);
-                else
-                    usage("Unknown option character `\\x%x'", optopt);
-
-            default:
-                usage(NULL);
-                break;
-        }
-    }
-
-    if (argc - optind < 2) {
-        usage(NULL);
-        quit(-1);
-    }
-
-    strncpy(phone_number, argv[optind++], sizeof(phone_number) - 1);
-    strncpy(text, argv[optind++], sizeof(text) - 1);
-
-    if (!strcmp(text, "-")) {
-        printf("Text? (press control+d to send)\n");
-        text[0] = '\0';
-        read_text_from_stdin();
-    }
+    // config file set to argument, if specified --config option
+    if (strlen(option.config))
+        conf_set_config_file(option.config);
 
     // 160 karakternél levágjuk a stringet. Ez majd megszűnik, ha rendben lesz
     // a PDU és a multi-part SMS
-    text[160] = '\0';
+    option.message_text[160] = '\0';
 
     if (conf_load())
         return 1;

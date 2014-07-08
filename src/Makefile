@@ -12,9 +12,13 @@ OBJ += ../libamievent/ami.o
 OBJ += pdu/charset.o
 OBJ += pdu/compat.o
 OBJ += pdu/pdu.o
-OBJ += banner.o
+OBJ += option.o
 OBJ += conf.o
 PROGS=sms
+
+# take version from GIT
+GIT_VERSION = $(shell sh -c 'git describe --abbrev=6 --dirty --always --tags')
+CFLAGS += -DVERSION=\"$(GIT_VERSION)\"
 
 .PHONY: all
 all: $(patsubst %, %.o, $(PROGS)) $(OBJ) $(PROGS)
