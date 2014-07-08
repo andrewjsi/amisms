@@ -11,6 +11,7 @@
 #include <wordexp.h>
 
 #include "debug.h"
+#include "misc.h"
 #include "ini/ini.h"
 #include "uthash.h"
 #include "conf.h"
@@ -72,7 +73,7 @@ static int ini_handler (void *userdata, const char *section, const char *name, c
         if (item == NULL) {
             item = (struct conf_device_t*)malloc(sizeof(*item));
             memset(item, 0, sizeof(*item));
-            strncpy(item->device_name, section, sizeof(item->device_name) - 1);
+            scpy(item->device_name, section);
             HASH_ADD_STR(conf_device_hash, device_name, item);
 
         }
@@ -145,7 +146,7 @@ void config_check () {
 
     // if no default device specified, then the first device to be default
     if (!strlen(conf_root_struct->default_device_name)) {
-        strncpy(conf_root_struct->default_device_name, conf_device_hash->device_name, sizeof(conf_root_struct->default_device_name) - 1);
+        scpy(conf_root_struct->default_device_name, conf_device_hash->device_name);
     }
 
     HASH_FIND_STR(conf_device_hash, conf_root_struct->default_device_name, s);
@@ -159,8 +160,8 @@ void conf_set_config_file (const char *file_expression) {
     if (file_expression == NULL || strlen(file_expression) == 0)
         return;
 
+    // parse config file name as shell expression
     wordexp_t p;
-
     if (wordexp(file_expression, &p, WRDE_NOCMD)) {
         printf("Config file name mismatch: \"%s\"\n", file_expression);
         parse_error = 1;
@@ -168,7 +169,7 @@ void conf_set_config_file (const char *file_expression) {
         return;
     }
 
-    strncpy(config_file, p.we_wordv[0], sizeof(config_file) - 1);
+    scpy(config_file, p.we_wordv[0]);
     wordfree(&p);
 }
 
