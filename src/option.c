@@ -46,10 +46,6 @@ static const char *optstring = "c:dfhsv";
 static char my_basename[64];
 static char error_message[512];
 
-void option_set_basename (const char *bn) {
-    scpy(my_basename, basename((char*)bn));
-}
-
 static void print_logo () {
     printf(
         "JSS SMS Sender version %s\n"
@@ -98,6 +94,8 @@ void option_print_help (char *fmt, ...) {
 }
 
 int option_parse_args (int argc, char *argv[]) {
+    scpy(my_basename, basename((char*)argv[0]));
+
     int getopt_parse_error = 0;
     opterr = 0; // tell getopt to avoid print internal error messages
 

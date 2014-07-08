@@ -35,7 +35,7 @@ void quit (int code) {
 }
 
 static void event_donglesmsstatus (ami_event_t *event) {
-    char *status = ami_getvar(event, "Status");
+    const char *status = ami_getvar(event, "Status");
     con_debug("DongleSMSStatus (ID=%s, Status=%s)", ami_getvar(event, "ID"), status);
 
     if (!strcmp(status, "Sent")) {
@@ -48,7 +48,7 @@ static void event_donglesmsstatus (ami_event_t *event) {
 }
 
 static void response_donglesendpdu (ami_event_t *event) {
-    char *id = ami_getvar(event, "ID");
+    const char *id = ami_getvar(event, "ID");
     con_debug("Received DongleSendPDU response (ID=%s, Message=%s", id, ami_getvar(event, "Message"));
 
     con_debug("Registering event DongleSMSStatus with ID %s", id);
@@ -116,8 +116,6 @@ void event_connect (ami_event_t *event) {
 }
 
 int main (int argc, char *argv[]) {
-    option_set_basename(argv[0]);
-
     // parse command-line arguments and save to option structure (in option.h)
     option_parse_args(argc, argv);
 
