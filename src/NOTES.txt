@@ -1,0 +1,17 @@
+AMISMS
+======
+
+Send SMS over Asterisk Manager Interface with chan_dongle
+
+sms küldő függvényt csinálni, egy API-t, amin keresztül működik. Lehetne
+forgatni külön amisms binárist meg libamisms libet
+
+amisms_t *amisms = NULL;
+amisms = amisms_new();
+amisms_parse_configfile(amisms, "~/.smsrc");
+amisms_option("host", "localhost");
+amisms_option("port", "54");
+amisms_options("port", "54", "host", "localhost", NULL);
+amisms_set_callback_print(*void);
+amisms_send_sms
+amisms_strerror(amisms);
