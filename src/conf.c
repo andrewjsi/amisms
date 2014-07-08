@@ -156,6 +156,9 @@ void config_check () {
 }
 
 void conf_set_config_file (const char *file_expression) {
+    if (file_expression == NULL || strlen(file_expression) == 0)
+        return;
+
     wordexp_t p;
 
     if (wordexp(file_expression, &p, WRDE_NOCMD)) {
