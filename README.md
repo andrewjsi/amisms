@@ -1,8 +1,8 @@
-# SMS Sender through Asterisk Manager Interface via chan_dongle
+# SMS Sender via Asterisk chan_dongle
 
-AMISMS is a simple command-line tool written in C, which connect to an Asterisk
-PBX via Asterisk Manager Interface and send SMS over a USB Huawei GSM/UMTS
-modem via chan_dongle channel driver.
+AMISMS is a simple command-line tool written in C, which connect to a local or
+remote Asterisk PBX via Asterisk Manager Interface and send SMS over a USB
+Huawei GSM/UMTS modem via chan_dongle channel driver.
 
 AMISMS use the [asynchronous event-driven libamievent
 library](https://github.com/andrewjsi/libamievent), which is present as

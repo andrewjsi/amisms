@@ -49,7 +49,7 @@ static char error_message[512];
 static void print_logo () {
     printf(
         "JSS SMS Sender version %s\n"
-        "(c) 2012-2014 JSS&Hayer - http://www.jsshayer.hu/libamievent\n"
+        "(c) 2012-2014 JSS&Hayer - http://amisms.jss.hu\n"
         "\n"
         , VERSION
     );
