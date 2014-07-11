@@ -15,6 +15,7 @@
 #include <getopt.h>
 #include <ctype.h>      // isprint()
 
+#include "defaults.h"
 #include "option.h"
 #include "misc.h"
 #include "debug.h"
@@ -89,6 +90,7 @@ void option_print_help (char *fmt, ...) {
         printf(" -v, --verbose               verbose output to stderr\n");
         printf(" -f, --flash                 flash SMS\n");
         printf(" -s, --stdin                 read message text from stdin\n");
+        printf(" -c, --config                config file (default: %s)\n", DEFAULT_CONFIG_FILE);
     }
     exit(1);
 }

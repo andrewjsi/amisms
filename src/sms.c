@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
+#include "defaults.h"
 #include "ami.h"
 #include "conf.h"
 #include "pdu/pdu.h"
@@ -20,8 +21,6 @@
 #include "logger.h"
 
 #include "option.h"
-
-#define DEFAULT_CONFIG_FILE "~/.smsrc"
 
 /*****************************************************************************/
 
