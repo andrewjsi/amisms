@@ -206,7 +206,10 @@ int conf_load () {
         goto err;
     }
 
-    // permissions in octal, eg: "100644"
+    // permissions in octal, eg: "100644" or "20666"
+    // TODO: ha /dev/null -t próbálom beolvastatni a config fájllal, akkor
+    // "20666" a permission és a lenti kiírás és ellenőrzés is rossz lesz, mert
+    // elcsúszik egy karakter.
     char perm[7];
     snprintf(perm, sizeof(perm), "%lo", (unsigned long) cstat.st_mode);
     if (perm[5] != '0') {
