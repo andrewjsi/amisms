@@ -206,8 +206,11 @@ int conf_load () {
     char perm[7];
     snprintf(perm, sizeof(perm), "%lo", (unsigned long) cstat.st_mode);
     if (perm[5] != '0') {
-        printf("Config file is world-readable (mode %s)\n", perm);
-        printf("Please correct with \"chmod o= %s\" command!\n", config_file);
+        printf("Config file is world-readable (mode %c%c%c)\n", perm[3], perm[4], perm[5]);
+        printf("The configuration file, only the owner can have read\n");
+        printf("access in order to remain safe on the AMI credentials.\n");
+        printf("Please correct the permissions with this command:\n");
+        printf("    chmod o= %s\n", config_file);
         goto err;
     }
 
