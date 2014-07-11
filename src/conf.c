@@ -146,12 +146,16 @@ void config_check () {
 
     // if no default device specified, then the first device to be default
     if (!strlen(conf_root_struct->default_device_name)) {
-        scpy(conf_root_struct->default_device_name, conf_device_hash->device_name);
+        if (conf_device_hash != NULL) {
+            scpy(conf_root_struct->default_device_name, conf_device_hash->device_name);
+        }
     }
 
     HASH_FIND_STR(conf_device_hash, conf_root_struct->default_device_name, s);
     if (s == NULL) {
-        printf("Default device not found: \"%s\"\n", conf_root_struct->default_device_name);
+        if (strlen(conf_root_struct->default_device_name)) {
+            printf("Default device not found: \"%s\"\n", conf_root_struct->default_device_name);
+        }
         parse_error = 1;
     }
 }
