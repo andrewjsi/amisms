@@ -166,7 +166,16 @@ int option_parse_args (int argc, char *argv[]) {
                 "You can also specify -s option to read text from stdin."
             );
         }
-        scpy(option.message_text, argv[optind++]);
+
+        // read all other arguments to message_text, delimeted with whitespaces
+        while (optind < argc) {
+            concatf(option.message_text, "%s ", argv[optind++]);
+        }
+
+        // remove last whitespace
+        if (option.message_text[strlen(option.message_text) - 1] == ' ') {
+            option.message_text[strlen(option.message_text) - 1] = '\0';
+        }
     } else {
         // read from stdin
         printf("Text? (press control+d to send)\n");
