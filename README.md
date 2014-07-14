@@ -75,10 +75,6 @@ Send kernel version to mobile phone's display:
 
 ## Known bugs
 
-* The international phone number begins with '+' char format does not always
-  work.  Try the local country phone number format without the '+' char. It is
-  possible that this is caused by an error PDU conversion.
-
 ## Caveats
 
 * the PDU routines not perfect, currently only 7bit GSM charset allowed
