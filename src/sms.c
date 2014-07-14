@@ -11,7 +11,7 @@
 #include "defaults.h"
 #include "ami.h"
 #include "conf.h"
-#include "pdu/pdu.h"
+#include "pdu.h"
 #include "debug.h"
 #include "misc.h"
 
