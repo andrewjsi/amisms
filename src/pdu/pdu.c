@@ -308,6 +308,11 @@ void make_pdu(char* number, char* message, int messagelen, int alphabet, int fla
     numberformat = NF_UNKNOWN;
     snprintf(tmp, sizeof(tmp), "%s", number +1);
   }
+  else if (number[0] == '+')
+  {
+    numberformat = NF_INTERNATIONAL;
+    snprintf(tmp, sizeof(tmp), "%s", number + 1);
+  }
   else
   {
     numberformat = NF_INTERNATIONAL;
