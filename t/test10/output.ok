@@ -1,0 +1,9 @@
+After parsing:
+option.flash = 1
+option.help = 0
+option.stdin = 0
+option.verbose = 0
+option.config = conf
+option.message_text = one two three four five
+option.phone_number = 12345
+
