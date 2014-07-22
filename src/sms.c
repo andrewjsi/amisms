@@ -46,9 +46,31 @@ static void event_donglesmsstatus (ami_event_t *event) {
     }
 }
 
+// returns 0 if the given message is eg. "[dongle0] SMS queued for send"
+static int check_sms_queued_for_send_message (char *given_message) {
+    char required_message[96];
+    // example: "[dongle0] SMS queued for send"
+    snprintf(
+        required_message,
+        sizeof(required_message),
+        "[%s] SMS queued for send",
+        conf_device(selected_device)->dongle
+    );
+
+    if (given_message == NULL)
+        return -1;
+
+    return strcmp(given_message, required_message);
+}
+
 static void response_donglesendpdu (ami_event_t *event) {
     const char *id = ami_getvar(event, "ID");
     con_debug("Received DongleSendPDU response (ID=%s, Message=%s", id, ami_getvar(event, "Message"));
+
+    if (check_sms_queued_for_send_message(ami_getvar(event, "Message"))) {
+        printf("FAILED: %s\n", ami_getvar(event, "Message"));
+        quit(-1);
+    }
 
     con_debug("Registering event DongleSMSStatus with ID %s", id);
     ami_event_register(ami, event_donglesmsstatus, NULL,
