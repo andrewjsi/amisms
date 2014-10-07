@@ -6,7 +6,7 @@ CFLAGS += -I../../src
 CFLAGS += -ggdb
 LDFLAGS = -lev -lm
 
-OBJ += ../../src/option.o ../../libamievent/libc-jss/misc.o
+OBJ += ../../src/option.o ../../libamievent/libc-jss/misc.o ../../src/verbose.o
 PROGS=test
 
 CFLAGS += -DVERSION=\"test\"

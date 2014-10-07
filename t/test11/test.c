@@ -19,7 +19,7 @@
 void p (const char *locale, const char *phone_number) {
     pnv_t *pnv;
     pnv = pnv_new(phone_number);
-    pnv_set_default_locale(pnv, locale);
+    pnv_set_locale(pnv, locale);
 
     enum pnv_state state = pnv_validate(pnv);
     printf(fmt

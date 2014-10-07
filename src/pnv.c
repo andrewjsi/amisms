@@ -33,13 +33,13 @@ struct pnv_table {
     int (*local)(pnv_t*);
     int (*international)(pnv_t*);
 } pnv_table[] = {
-    {   .iso            = "hu",
+    {   .iso            = "HU",
         .code           = "36",
         .country        = "Hungary",
         .local          = pnv_hu_local,
         .international  = pnv_hu_international,
     },
-    {   .iso            = "de",
+    {   .iso            = "DE",
         .code           = "49",
         .country        = "Germany",
         .local          = NULL,
@@ -220,13 +220,13 @@ enum pnv_state pnv_validate (pnv_t *pnv) {
 
         // ha nincs beállítva a helyi locale, akkor nem tudjuk ellenőrizni a
         // helyi számozást, és konvertálni sem tudjuk nemzetközi formátumra
-        if (!strlen(pnv->default_locale)) {
+        if (!strlen(pnv->locale)) {
             PNV_RETURN_UNKNOWN("helyi számot nem lehet vizsgálni ismeretlen régióban");
         }
 
         // megkeressük a helyi régióhoz tartozó local() függvényt
         FOREACH_PNV_TABLE (row) {
-            if (row->iso && !strcmp(pnv->default_locale, row->iso)) {
+            if (row->iso && !strcmp(pnv->locale, row->iso)) {
                 pnv->result_country = row->country;
                 PNV_DEBUG("Found country: %s\n", row->country);
 
@@ -249,7 +249,7 @@ enum pnv_state pnv_validate (pnv_t *pnv) {
     // local() függvény egy olyan szolgáltatás számát engedélyezte, ami csak
     // belföldről elérhető (pl. 12xx SMS számok)
     if (pnv->phone_number_converted[0] != '+') {
-        if (!strlen(pnv->result_msg_ok)) {
+        if (!pnv->result_msg_ok || !strlen(pnv->result_msg_ok)) {
             PNV_RETURN_FAIL("belső hiba, a local() függvény OK-ot adott vissza, de nem írt a result_msg_ok -ba, és nem is konvertálta át a telefonszámot nemzetközi (+) formátumba!");
         }
         return ret;
@@ -294,17 +294,14 @@ enum pnv_state pnv_validate (pnv_t *pnv) {
     return ret;
 }
 
-static void determine_default_locale (pnv_t *pnv) {
+static void determine_locale (pnv_t *pnv) {
     char *locale;
     locale = setlocale(LC_TELEPHONE, "");
 
     if (!locale || !strcmp(locale, "C") || !strcmp(locale, "POSIX"))
         return;
 
-    scpy(pnv->default_locale, locale);
-
-    // "hu_HU.UTF-8" stringet levágja erre: "hu"
-    strcutpbrk(pnv->default_locale, "_.-,");
+    pnv_set_locale(pnv, locale);
 }
 
 pnv_t *pnv_new (const char *phone_number_converted) {
@@ -317,7 +314,7 @@ pnv_t *pnv_new (const char *phone_number_converted) {
 
     scpy(pnv->phone_number_converted, phone_number_converted);
     scpy(pnv->phone_number_original, phone_number_converted);
-    determine_default_locale(pnv);
+    determine_locale(pnv);
 
     return pnv;
 }
@@ -359,19 +356,25 @@ const char *pnv_get_phone_number_original (pnv_t *pnv) {
     return pnv->phone_number_original;
 }
 
-void pnv_set_default_locale (pnv_t *pnv, const char *locale) {
+void pnv_set_locale (pnv_t *pnv, const char *locale) {
     if (!pnv)
         return;
 
     if (!locale || !strlen(locale)) {
-        pnv->default_locale[0] = '\0';
+        pnv->locale[0] = '\0';
         return;
     }
 
     if (strlen(locale) >= 2) {
-        pnv->default_locale[0] = tolower(locale[0]);
-        pnv->default_locale[1] = tolower(locale[1]);
-        pnv->default_locale[2] = '\0';
+        pnv->locale[0] = toupper(locale[0]);
+        pnv->locale[1] = toupper(locale[1]);
+        pnv->locale[2] = '\0';
     }
+}
+
+const char *pnv_get_locale (pnv_t *pnv) {
+    if (!pnv)
+        return NULL;
+    return pnv->locale;
 }
 

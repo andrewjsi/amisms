@@ -16,7 +16,7 @@ typedef struct pnv_t {
     char tmp[128];                      // string temp, makrók használják
     char phone_number_original[128];    // paraméterben megadott telefonszám kerül ide
     char phone_number_converted[128];   // ide is, de a regexpek itt fognak vele játszani
-    char default_locale[16];
+    char locale[8];                     // pl. HU vagy DE
     char *result_country;
     char *result_iso_code;
     char *result_msg_ok;
@@ -33,5 +33,6 @@ const char *pnv_get_msg_ok (pnv_t *pnv);
 const char *pnv_get_msg_fail (pnv_t *pnv);
 const char *pnv_get_phone_number_converted (pnv_t *pnv);
 const char *pnv_get_phone_number_original (pnv_t *pnv);
-void pnv_set_default_locale (pnv_t *pnv, const char *locale);
+void pnv_set_locale (pnv_t *pnv, const char *locale);
+const char *pnv_get_locale (pnv_t *pnv);
 

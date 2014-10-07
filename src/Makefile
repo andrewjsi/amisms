@@ -15,6 +15,7 @@ OBJ += pdu/pdu.o
 OBJ += option.o
 OBJ += conf.o
 OBJ += pnv.o
+OBJ += verbose.o
 PROGS=sms
 
 # take version from GIT

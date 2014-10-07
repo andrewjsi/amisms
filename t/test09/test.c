@@ -17,7 +17,6 @@ void dump () {
     debi(option.flash);
     debi(option.help);
     debi(option.stdin);
-    debi(option.verbose);
     debs(option.config);
     debs(option.message_text);
     debs(option.phone_number);
