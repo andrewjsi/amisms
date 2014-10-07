@@ -14,6 +14,7 @@
 #include "pdu/pdu.h"
 #include "debug.h"
 #include "misc.h"
+#include "pnv.h"
 
 #ifdef DEBUG
 #define CON_DEBUG
@@ -25,11 +26,15 @@
 /*****************************************************************************/
 
 ami_t *ami;
+pnv_t *pnv = NULL;
 const char *selected_device = NULL;
 
 /*****************************************************************************/
 
 void quit (int code) {
+    if (pnv)
+        pnv_destroy(pnv);
+
     exit(code);
 }
 
@@ -136,6 +141,41 @@ void event_connect (ami_event_t *event) {
     convert_and_send_sms();
 }
 
+int phone_number_validation () {
+    // --nopnv kapcsoló esetén nem ellenőrizzük a telefonszámot
+    if (option.nopnv || conf_root()->pnv == CONF_PNV_OFF)
+        return 0;
+
+    // új pnv objektum. A locale környezeti változókból megállapítja az
+    // alapértelmezett régiót (default-locale). Ez felülírható a config által.
+    pnv = pnv_new(option.phone_number);
+
+    // Ha a configban meg van adva, akkor a default-locale alapján beállítjuk a
+    // pnv alapértelmezett régióját, ami a helyi formátumú számokhoz kell.
+    if (strlen(conf_root()->default_locale))
+        pnv_set_default_locale(pnv, conf_root()->default_locale);
+
+    // validálás
+    switch (pnv_validate(pnv)) {
+        case PNV_OK:
+            return 0;
+
+        case PNV_FAIL:
+            printf("FAILED: %s\n", pnv_get_msg_fail(pnv));
+            return -1;
+
+        case PNV_UNKNOWN:
+            if (conf_root()->pnv == CONF_PNV_FORCE) {
+                printf("FAILED: %s\n", pnv_get_msg_fail(pnv));
+                return -1;
+            } else {
+                return 0;
+            }
+    }
+
+    return 0;
+}
+
 int main (int argc, char *argv[]) {
     // parse command-line arguments and save to option structure (in option.h)
     option_parse_args(argc, argv);
@@ -157,6 +197,9 @@ int main (int argc, char *argv[]) {
 
     if (conf_load())
         return 1;
+
+    if (phone_number_validation())
+        return -1;
 
     if (selected_device == NULL)
         selected_device = conf_root()->default_device_name;

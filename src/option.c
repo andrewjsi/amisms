@@ -38,6 +38,7 @@ static struct option longopts[] = { // please :sort this table after modify
     {"config",      required_argument,  0,                  'c'},
     {"flash",       no_argument,        0,                  'f'},
     {"help",        no_argument,        0,                  'h'},
+    {"nopnv",       no_argument,        &option.nopnv,        1},
     {"stdin",       no_argument,        0,                  's'},
     {"verbose",     no_argument,        0,                  'v'},
     {0, 0, 0, 0}
@@ -91,6 +92,7 @@ void option_print_help (char *fmt, ...) {
         printf(" -f, --flash                 flash SMS\n");
         printf(" -s, --stdin                 read message text from stdin\n");
         printf(" -c, --config                config file (default: %s)\n", DEFAULT_CONFIG_FILE);
+        printf("     --nopnv                 skip phone number validation\n");
     }
     exit(1);
 }

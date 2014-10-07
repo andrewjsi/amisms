@@ -12,6 +12,12 @@ struct conf_device_t {
 
 struct conf_root_t {
     char default_device_name[64];   // default device to use
+    char default_locale[8];         // default two-letter locale, used by pnv
+    enum {
+        CONF_PNV_ON,
+        CONF_PNV_OFF,
+        CONF_PNV_FORCE,
+    } pnv;
 };
 
 void conf_unload ();

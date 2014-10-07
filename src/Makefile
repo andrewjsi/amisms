@@ -14,6 +14,7 @@ OBJ += pdu/compat.o
 OBJ += pdu/pdu.o
 OBJ += option.o
 OBJ += conf.o
+OBJ += pnv.o
 PROGS=sms
 
 # take version from GIT

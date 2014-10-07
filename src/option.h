@@ -19,6 +19,7 @@ struct option_t {
     int flash;
     int verbose;
     int stdin;
+    int nopnv;
 };
 
 // this variable holds the all options
