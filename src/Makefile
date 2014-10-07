@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall -Wno-strict-aliasing
+CFLAGS += -O2 -Wall -Wno-strict-aliasing
 # CFLAGS += -ggdb
 CFLAGS += -I../libamievent -I../libamievent/libc-jss -I../pdu
 LDFLAGS = -lev -lm
