@@ -114,6 +114,16 @@ int option_parse_args (int argc, char *argv[]) {
             break;
 
         switch (c) {
+            case 0:
+                /* If this option set a flag, do nothing else now. */
+                if (longopts[option_index].flag != 0)
+                    break;
+                printf ("option %s", longopts[option_index].name);
+                if (optarg)
+                    printf (" with arg %s", optarg);
+                printf ("\n");
+                break;
+
             case 'c':
                 scpy(option.config, optarg);
                 break;
