@@ -1,5 +1,3 @@
-// TODO: SIGALRM stílusú absolute timeout
-
 #include <stdio.h>
 #include <string.h>
 #include <ev.h>
@@ -7,6 +5,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <signal.h>
 
 #include "defaults.h"
 #include "ami.h"
@@ -176,7 +175,16 @@ int phone_number_validation () {
     return 0;
 }
 
+void got_sigalrm (int signum) {
+    printf("Timeout\n");
+    quit(-1);
+}
+
 int main (int argc, char *argv[]) {
+    // absolute timeout
+    alarm(35);
+    signal(SIGALRM, got_sigalrm);
+
     // parse command-line arguments and save to option structure (in option.h)
     option_parse_args(argc, argv);
 
