@@ -21,3 +21,8 @@ PNV_FAIL    062            +362            Hungary              kevés számjegy
 PNV_FAIL    06             +36             Hungary              kevés számjegy (null)    
 PNV_FAIL    +              +               (null)               kevés számjegy (null)    
 PNV_FAIL    +362012+4567   +362012+4567    (null)               túl sok + karakter (null)    
+PNV_OK      36201234567    +36201234567    Hungary              (null)     Telenor   
+PNV_OK      201234567      +36201234567    Hungary              (null)     Telenor   
+PNV_OK      301234567      +36301234567    Hungary              (null)     T-Mobile  
+PNV_OK      311234567      +36311234567    Hungary              (null)     Tesco mobile
+PNV_OK      701234567      +36701234567    Hungary              (null)     Vodafone  

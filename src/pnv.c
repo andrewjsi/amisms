@@ -146,6 +146,21 @@ int pnv_hu_local (pnv_t *pnv) {
         PNV_PRINTF("+36%s", &pnv->phone_number_converted[2]);
     }
 
+    // 36 helyett +36
+    PNV_IF_REGEX("^36") {
+        PNV_PRINTF("+%s", &pnv->phone_number_converted[0]);
+    }
+
+    // 20....... és 70....... helyett +3620 és +3670
+    PNV_IF_REGEX("^[27]0.......$") {
+        PNV_PRINTF("+36%s", &pnv->phone_number_converted[0]);
+    }
+
+    // 30....... és 31....... helyett +3630 és +3631
+    PNV_IF_REGEX("^3[01].......$") {
+        PNV_PRINTF("+36%s", &pnv->phone_number_converted[0]);
+    }
+
     // 00 helyett +
     PNV_IF_REGEX("^00") {
         PNV_PRINTF("+%s", &pnv->phone_number_converted[2]);
