@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <signal.h>
+#include <stdarg.h>
 
 #include "defaults.h"
 #include "ami.h"
@@ -15,6 +16,7 @@
 #include "misc.h"
 #include "pnv.h"
 #include "verbose.h"
+#include "sms.h"
 
 #ifdef DEBUG
 #define CON_DEBUG
@@ -31,11 +33,18 @@ const char *selected_device = NULL;
 
 /*****************************************************************************/
 
-void quit (int code) {
+void quit (int exitcode, const char *fmt, ...) {
     if (pnv)
         pnv_destroy(pnv);
 
-    exit(code);
+    if (fmt) {
+        va_list ap;
+        va_start(ap, fmt);
+        vprintf(fmt, ap);
+        va_end(ap);
+    }
+
+    exit(exitcode);
 }
 
 static void event_donglesmsstatus (ami_event_t *event) {
@@ -44,10 +53,9 @@ static void event_donglesmsstatus (ami_event_t *event) {
 
     if (!strcmp(status, "Sent")) {
         verbosef(1, "Sent OK\n");
-        quit(0);
+        quit(0, NULL);
     } else {
-        printf("FAILED: not sent: %s\n", status);
-        quit(-1);
+        quit(EXIT_ERR, "FAILED: not sent: %s\n", status);
     }
 }
 
@@ -73,8 +81,7 @@ static void response_donglesendpdu (ami_event_t *event) {
     verbosef(3, "Received DongleSendPDU response (ID=%s, Message=%s\n", id, ami_getvar(event, "Message"));
 
     if (check_sms_queued_for_send_message(ami_getvar(event, "Message"))) {
-        printf("FAILED: %s\n", ami_getvar(event, "Message"));
-        quit(-1);
+        quit(EXIT_AGAIN, "FAILED: %s\n", ami_getvar(event, "Message"));
     }
 
     verbosef(3, "Registering event DongleSMSStatus with ID %s\n", id);
@@ -123,13 +130,12 @@ void convert_and_send_sms () {
 }
 
 void event_disconnect (ami_event_t *event) {
-    printf("FAILED: %s %s(%s:%s): %s\n",
+    quit(EXIT_AGAIN, "FAILED: %s %s(%s:%s): %s\n",
         (!strcmp(ami_getvar(event, "WasAuthenticated"), "1")) ? "Disconnected from" : "Can't connect to",
         ami_getvar(event, "Host"),
         ami_getvar(event, "IP"),
         ami_getvar(event, "Port"),
         ami_getvar(event, "Reason"));
-    quit(-1);
 }
 
 void event_connect (ami_event_t *event) {
@@ -165,8 +171,7 @@ int phone_number_validation () {
 
         case PNV_FAIL:
             verbosef(2, "Phone number validation FAIL\n");
-            printf("FAILED: %s\n", pnv_get_msg_fail(pnv));
-            return -1;
+            quit(EXIT_ERR, "FAILED: %s\n", pnv_get_msg_fail(pnv));
 
         case PNV_UNKNOWN:
             verbosef(2, "Phone number maybe not valid: %s\n", pnv_get_msg_fail(pnv));
@@ -182,8 +187,7 @@ int phone_number_validation () {
 }
 
 void got_sigalrm (int signum) {
-    printf("FAILED: timeout\n");
-    quit(-1);
+    quit(EXIT_AGAIN, "FAILED: timeout\n");
 }
 
 int main (int argc, char *argv[]) {
