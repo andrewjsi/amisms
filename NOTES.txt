@@ -1,2 +1,7 @@
 Megvizsgálni ezt a patch-et:
 http://code.google.com/p/asterisk-chan-dongle/issues/detail?id=1
+
+TODO:
+- stdin mód ütközik az absolute timeout-al
+- stdin módban csak a szöveg begépelése után derül ki, hogy rossz a telefonszám
+
