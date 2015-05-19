@@ -24,8 +24,10 @@ clean:
 .PHONY: install
 install: all
 	install src/sms /usr/local/bin
+	install src/phone_number_validator /usr/local/bin/phone_number_validator
 
 .PHONY: uninstall
 uninstall: all
 	rm -f /usr/local/bin/sms
+	rm -f /usr/local/bin/phone_number_validator
 
