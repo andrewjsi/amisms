@@ -117,7 +117,7 @@ void convert_and_send_sms () {
 
     make_pdu(
         pnv_get_phone_number_converted(pnv), option.message_text, strlen(option.message_text), alphabet, option.flash,
-        report, with_udh, udh_data, "new", pdu, 1440, 0, 0, 0, NULL);
+        report, with_udh, udh_data, "new", pdu, 1440, 0, 0, 1, NULL);
 
     verbosef(3, "Sending DongleSendPDU action with PDU \"%s\"\n", pdu);
     ami_action(ami, response_donglesendpdu, NULL,
