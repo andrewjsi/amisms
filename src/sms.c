@@ -115,11 +115,9 @@ void convert_and_send_sms () {
     verbosef(3, "phone_number = \"%s\", message_text=\"%s\"\n", pnv_get_phone_number_converted(pnv), option.message_text);
     char pdu[4096];
 
-    int num_type = 0;   // please probe this with 0, 1 and 2!
-
     make_pdu(
         pnv_get_phone_number_converted(pnv), option.message_text, strlen(option.message_text), alphabet, option.flash,
-        report, with_udh, udh_data, "new", pdu, 1440, 0, 0, num_type, NULL);
+        report, with_udh, udh_data, "new", pdu, 1440, 0, 0, 0, NULL);
 
     verbosef(3, "Sending DongleSendPDU action with PDU \"%s\"\n", pdu);
     ami_action(ami, response_donglesendpdu, NULL,
