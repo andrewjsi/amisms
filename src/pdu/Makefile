@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Wall -ggdb -I../libjsi -DUSE_ICONV
+CFLAGS = -Wall -ggdb -I../../libamievent/libc-jss -DUSE_ICONV
 
-OBJ += pdu.o charset.o compat.o
+OBJ += pdu.o charset.o compat.o ../verbose.o
 PROGS=test
 
 .PHONY: all
