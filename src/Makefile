@@ -16,7 +16,7 @@ OBJ += option.o
 OBJ += conf.o
 OBJ += pnv.o
 OBJ += verbose.o
-PROGS=sms phone_number_validator
+PROGS=sms phone_number_validator pnv_json
 
 # take version from GIT
 GIT_VERSION = $(shell sh -c 'git describe --abbrev=6 --dirty --always --tags')
