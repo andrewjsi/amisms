@@ -131,15 +131,7 @@ const char *pnv_state_str (enum pnv_state state) {
 
 int pnv_hu_local (pnv_t *pnv) {
     // szóköz, kötőjel, vessző és pont karakterek kivágása
-    PNV_DELCHARS(" -,.");
-
-    // 70/940-5300 formátum
-    PNV_IF_REGEX("^../") {
-        PNV_PRINTF("+36%s", pnv->phone_number_converted);
-    }
-
-    // / karakterek kivágása
-    PNV_DELCHARS("/");
+    PNV_DELCHARS(" -,./");
 
     // 06 helyett +36
     PNV_IF_REGEX("^06") {
@@ -151,14 +143,16 @@ int pnv_hu_local (pnv_t *pnv) {
         PNV_PRINTF("+%s", &pnv->phone_number_converted[0]);
     }
 
-    // 20....... és 70....... helyett +3620 és +3670
-    PNV_IF_REGEX("^[27]0.......$") {
-        PNV_PRINTF("+36%s", &pnv->phone_number_converted[0]);
-    }
+    if (PNV_LEN == 9) {
+        // 20....... és 70....... helyett +3620 és +3670
+        PNV_IF_REGEX("^[27]0.......$") {
+            PNV_PRINTF("+36%s", &pnv->phone_number_converted[0]);
+        }
 
-    // 30....... és 31....... helyett +3630 és +3631
-    PNV_IF_REGEX("^3[01].......$") {
-        PNV_PRINTF("+36%s", &pnv->phone_number_converted[0]);
+        // 30....... és 31....... helyett +3630 és +3631
+        PNV_IF_REGEX("^3[01].......$") {
+            PNV_PRINTF("+36%s", &pnv->phone_number_converted[0]);
+        }
     }
 
     // 00 helyett +
@@ -178,8 +172,11 @@ int pnv_hu_local (pnv_t *pnv) {
 }
 
 int pnv_hu_international (pnv_t *pnv) {
+    // szóköz, kötőjel, vessző és pont karakterek kivágása
+    PNV_DELCHARS(" -,./");
+
     // legalább 6 jegyűnek (a + karaktert is beleértve) kell lennie a
-    // teleofnszámnak
+    // telefonszámnak
     if (PNV_LEN < 6)
         PNV_RETURN_FAIL("kevés számjegy");
 
@@ -347,6 +344,7 @@ const char *pnv_get_country (pnv_t *pnv) {
     return pnv->result_country;
 }
 
+// TODO: ezt talán jobb lenne pnv_get_provider -re átnevezni
 const char *pnv_get_msg_ok (pnv_t *pnv) {
     if (!pnv)
         return NULL;

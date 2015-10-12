@@ -62,6 +62,7 @@ int main (int argc, const char *argv[]) {
     p("hu", "301234567");
     p("hu", "311234567");
     p("hu", "701234567");
+    p("hu", "20 / 123 - 4567");
 
     return 0;
 }
