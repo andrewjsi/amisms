@@ -13,7 +13,7 @@ endif
 	cd src; $(MAKE) $(MFLAGS) all
 
 .PHONY: test
-test:
+test: all
 	cd t; $(MAKE) $(MFLAGS) all
 
 .PHONY: clean
