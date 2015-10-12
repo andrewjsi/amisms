@@ -201,9 +201,9 @@ int main (int argc, char *argv[]) {
     // config file set to default
     conf_set_config_file(DEFAULT_CONFIG_FILE);
 
-    // config file set to SMSAMI_CONFIG environment variable, if exists
-    if (getenv("SMSAMI_CONFIG"))
-        conf_set_config_file(getenv("SMSAMI_CONFIG"));
+    // config file set to AMISMS_CONFIG environment variable, if exists
+    if (getenv("AMISMS_CONFIG"))
+        conf_set_config_file(getenv("AMISMS_CONFIG"));
 
     // config file set to argument, if specified --config option
     if (strlen(option.config))
