@@ -93,6 +93,16 @@ static void response_donglesendpdu (ami_event_t *event) {
     verbosef(1, "Sending ...\n");
 }
 
+void repair_at_sign (char *string, int size) {
+    int i;
+    for (i = 0; i < size; i++) {
+        if (string[i] == '@') {
+            string[i] = 0; // @ character code in GSM 03.38 Character Set
+                           // reference: https://www.csoft.co.uk/support/character-sets
+        }
+    }
+}
+
 void convert_and_send_sms () {
     int alphabet;
 
@@ -115,8 +125,13 @@ void convert_and_send_sms () {
     verbosef(3, "phone_number = \"%s\", message_text=\"%s\"\n", pnv_get_phone_number_converted(pnv), option.message_text);
     char pdu[4096];
 
+    int message_length = strlen(option.message_text);
+
+    // @ character repair
+    repair_at_sign(option.message_text, message_length);
+
     make_pdu(
-        pnv_get_phone_number_converted(pnv), option.message_text, strlen(option.message_text), alphabet, option.flash,
+        pnv_get_phone_number_converted(pnv), option.message_text, message_length, alphabet, option.flash,
         report, with_udh, udh_data, "new", pdu, 1440, 0, 0, 1, NULL);
 
     verbosef(3, "Sending DongleSendPDU action with PDU \"%s\"\n", pdu);
