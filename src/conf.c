@@ -7,7 +7,6 @@
  */
 
 #include <errno.h>
-#include <sys/stat.h>
 #include <wordexp.h>
 
 #include "debug.h"
@@ -217,27 +216,6 @@ int conf_load () {
     memset(conf_root_struct, 0, sizeof(*conf_root_struct));
 
     // memset(&conf_device_hash_dummy, 0, sizeof(conf_device_hash_dummy));
-
-    struct stat cstat;
-    if (stat(config_file, &cstat)) {
-        printf("Can't open configuration from %s: %s\n", config_file, strerror(errno));
-        goto err;
-    }
-
-    // permissions in octal, eg: "100644" or "20666"
-    // TODO: ha /dev/null -t próbálom beolvastatni a config fájllal, akkor
-    // "20666" a permission és a lenti kiírás és ellenőrzés is rossz lesz, mert
-    // elcsúszik egy karakter.
-    char perm[7];
-    snprintf(perm, sizeof(perm), "%lo", (unsigned long) cstat.st_mode);
-    if (perm[5] != '0') {
-        printf("Config file is world-readable (mode %c%c%c)\n", perm[3], perm[4], perm[5]);
-        printf("The configuration file, only the owner can have read\n");
-        printf("access in order to remain safe on the AMI credentials.\n");
-        printf("Please correct the permissions with this command:\n");
-        printf("    chmod o= %s\n", config_file);
-        goto err;
-    }
 
     // config betöltése
     if (ini_parse(config_file, ini_handler, NULL) < 0) {
