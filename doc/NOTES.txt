@@ -1,3 +1,6 @@
+Ígéretes PDU Kekeskavi alapján:
+https://github.com/vilts/PDU
+
 Megvizsgálni ezt a patch-et:
 http://code.google.com/p/asterisk-chan-dongle/issues/detail?id=1
 
