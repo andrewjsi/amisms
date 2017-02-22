@@ -7,7 +7,6 @@
  */
 
 #include <errno.h>
-#include <sys/stat.h>
 #include <wordexp.h>
 
 #include "debug.h"
@@ -31,6 +30,8 @@ static int parse_error = 0;
 
 void conf_dump () {
     printf("default = %s\n", conf_root_struct->default_device_name);
+    printf("pnv = %d\n", conf_root_struct->pnv);
+    printf("default-locale = %s\n", conf_root_struct->default_locale);
 
     printf("\n");
     struct conf_device_t *s, *tmp;
@@ -54,6 +55,22 @@ static int ini_handler (void *userdata, const char *section, const char *name, c
         #define CPY(h) strncpy(conf_root_struct->h, value, sizeof(conf_root_struct->h) - 1)
         if (MATCH("default")) {
             CPY(default_device_name);
+
+        } else if (MATCH("default-locale")) {
+            CPY(default_locale);
+
+        } else if (MATCH("pnv")) {
+            if (!strcmp(value, "on")) {
+                conf_root_struct->pnv = CONF_PNV_ON;
+            } else if (!strcmp(value, "off")) {
+                conf_root_struct->pnv = CONF_PNV_OFF;
+            } else if (!strcmp(value, "force")) {
+                conf_root_struct->pnv = CONF_PNV_FORCE;
+            } else {
+                printf("config option \"pnv\" must be \"on\", \"off\" or \"forced\"");
+                parse_error = 1;
+                return 0;
+            }
 
         } else {
             printf("unknown config option \"%s\" in section \"%s\"\n", name, section);
@@ -199,27 +216,6 @@ int conf_load () {
     memset(conf_root_struct, 0, sizeof(*conf_root_struct));
 
     // memset(&conf_device_hash_dummy, 0, sizeof(conf_device_hash_dummy));
-
-    struct stat cstat;
-    if (stat(config_file, &cstat)) {
-        printf("Can't open configuration from %s: %s\n", config_file, strerror(errno));
-        goto err;
-    }
-
-    // permissions in octal, eg: "100644" or "20666"
-    // TODO: ha /dev/null -t próbálom beolvastatni a config fájllal, akkor
-    // "20666" a permission és a lenti kiírás és ellenőrzés is rossz lesz, mert
-    // elcsúszik egy karakter.
-    char perm[7];
-    snprintf(perm, sizeof(perm), "%lo", (unsigned long) cstat.st_mode);
-    if (perm[5] != '0') {
-        printf("Config file is world-readable (mode %c%c%c)\n", perm[3], perm[4], perm[5]);
-        printf("The configuration file, only the owner can have read\n");
-        printf("access in order to remain safe on the AMI credentials.\n");
-        printf("Please correct the permissions with this command:\n");
-        printf("    chmod o= %s\n", config_file);
-        goto err;
-    }
 
     // config betöltése
     if (ini_parse(config_file, ini_handler, NULL) < 0) {

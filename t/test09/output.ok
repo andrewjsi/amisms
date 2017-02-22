@@ -2,7 +2,6 @@ Before parsing:
 option.flash = 0
 option.help = 0
 option.stdin = 0
-option.verbose = 0
 option.config = 
 option.message_text = 
 option.phone_number = 
@@ -11,7 +10,6 @@ Before parsing:
 option.flash = 1
 option.help = 0
 option.stdin = 0
-option.verbose = 3
 option.config = conf
 option.message_text = 61
 option.phone_number = 59

@@ -1,5 +1,3 @@
-// TODO: SIGALRM stílusú absolute timeout
-
 #include <stdio.h>
 #include <string.h>
 #include <ev.h>
@@ -7,6 +5,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <signal.h>
+#include <stdarg.h>
 
 #include "defaults.h"
 #include "ami.h"
@@ -14,6 +14,9 @@
 #include "pdu.h"
 #include "debug.h"
 #include "misc.h"
+#include "pnv.h"
+#include "verbose.h"
+#include "sms.h"
 
 #ifdef DEBUG
 #define CON_DEBUG
@@ -25,38 +28,79 @@
 /*****************************************************************************/
 
 ami_t *ami;
+pnv_t *pnv = NULL;
 const char *selected_device = NULL;
 
 /*****************************************************************************/
 
-void quit (int code) {
-    exit(code);
+void quit (int exitcode, const char *fmt, ...) {
+    if (pnv)
+        pnv_destroy(pnv);
+
+    if (fmt) {
+        va_list ap;
+        va_start(ap, fmt);
+        vprintf(fmt, ap);
+        va_end(ap);
+    }
+
+    exit(exitcode);
 }
 
 static void event_donglesmsstatus (ami_event_t *event) {
     const char *status = ami_getvar(event, "Status");
-    con_debug("DongleSMSStatus (ID=%s, Status=%s)", ami_getvar(event, "ID"), status);
+    verbosef(3, "DongleSMSStatus (ID=%s, Status=%s)\n", ami_getvar(event, "ID"), status);
 
     if (!strcmp(status, "Sent")) {
-        printf("Sent OK\n");
-        quit(0);
+        verbosef(1, "Sent OK\n");
+        quit(0, NULL);
     } else {
-        printf("FAILED: not sent\n");
-        quit(-1);
+        quit(EXIT_ERR, "FAILED: not sent: %s\n", status);
     }
+}
+
+// returns 0 if the given message is eg. "[dongle0] SMS queued for send"
+static int check_sms_queued_for_send_message (char *given_message) {
+    char required_message[96];
+    // example: "[dongle0] SMS queued for send"
+    snprintf(
+        required_message,
+        sizeof(required_message),
+        "[%s] SMS queued for send",
+        conf_device(selected_device)->dongle
+    );
+
+    if (given_message == NULL)
+        return -1;
+
+    return strcmp(given_message, required_message);
 }
 
 static void response_donglesendpdu (ami_event_t *event) {
     const char *id = ami_getvar(event, "ID");
-    con_debug("Received DongleSendPDU response (ID=%s, Message=%s", id, ami_getvar(event, "Message"));
+    verbosef(3, "Received DongleSendPDU response (ID=%s, Message=%s\n", id, ami_getvar(event, "Message"));
 
-    con_debug("Registering event DongleSMSStatus with ID %s", id);
+    if (check_sms_queued_for_send_message(ami_getvar(event, "Message"))) {
+        quit(EXIT_AGAIN, "FAILED: %s\n", ami_getvar(event, "Message"));
+    }
+
+    verbosef(3, "Registering event DongleSMSStatus with ID %s\n", id);
     ami_event_register(ami, event_donglesmsstatus, NULL,
         "Event: DongleSMSStatus\n"
         "ID: %s\n"
         , id
     );
-    printf("Sending ...\n");
+    verbosef(1, "Sending ...\n");
+}
+
+void repair_at_sign (char *string, int size) {
+    int i;
+    for (i = 0; i < size; i++) {
+        if (string[i] == '@') {
+            string[i] = 0; // @ character code in GSM 03.38 Character Set
+                           // reference: https://www.csoft.co.uk/support/character-sets
+        }
+    }
 }
 
 void convert_and_send_sms () {
@@ -78,14 +122,19 @@ void convert_and_send_sms () {
     int with_udh = 0;
     char *udh_data = "";
 
-    con_debug("phone_number = \"%s\", message_text=\"%s\"", option.phone_number, option.message_text);
+    verbosef(3, "phone_number = \"%s\", message_text=\"%s\"\n", pnv_get_phone_number_converted(pnv), option.message_text);
     char pdu[4096];
 
-    make_pdu(
-        option.phone_number, option.message_text, strlen(option.message_text), alphabet, option.flash,
-        report, with_udh, udh_data, "new", pdu, 1440, 0, 0, 0, NULL);
+    int message_length = strlen(option.message_text);
 
-    con_debug("Sending DongleSendPDU action with PDU \"%s\"", pdu);
+    // @ character repair
+    repair_at_sign(option.message_text, message_length);
+
+    make_pdu(
+        pnv_get_phone_number_converted(pnv), option.message_text, message_length, alphabet, option.flash,
+        report, with_udh, udh_data, "new", pdu, 1440, 0, 0, 1, NULL);
+
+    verbosef(3, "Sending DongleSendPDU action with PDU \"%s\"\n", pdu);
     ami_action(ami, response_donglesendpdu, NULL,
         "Action: DongleSendPDU\n"
         "Device: %s\n"
@@ -96,17 +145,16 @@ void convert_and_send_sms () {
 }
 
 void event_disconnect (ami_event_t *event) {
-    printf("FAILED: %s %s(%s:%s): %s\n",
+    quit(EXIT_AGAIN, "FAILED: %s %s(%s:%s): %s\n",
         (!strcmp(ami_getvar(event, "WasAuthenticated"), "1")) ? "Disconnected from" : "Can't connect to",
         ami_getvar(event, "Host"),
         ami_getvar(event, "IP"),
         ami_getvar(event, "Port"),
         ami_getvar(event, "Reason"));
-    quit(-1);
 }
 
 void event_connect (ami_event_t *event) {
-    con_debug("* Connected to %s(%s:%s)\n",
+    verbosef(3, "Connected to %s(%s:%s)\n",
         ami_getvar(event, "Host"),
         ami_getvar(event, "IP"),
         ami_getvar(event, "Port"));
@@ -114,16 +162,63 @@ void event_connect (ami_event_t *event) {
     convert_and_send_sms();
 }
 
+int phone_number_validation () {
+    // --nopnv kapcsoló esetén nem ellenőrizzük a telefonszámot
+    if (option.nopnv || conf_root()->pnv == CONF_PNV_OFF)
+        return 0;
+
+    // új pnv objektum. A locale környezeti változókból megállapítja az
+    // alapértelmezett régiót (default-locale). Ez felülírható a config által.
+    pnv = pnv_new(option.phone_number);
+
+    // Ha a configban meg van adva, akkor a default-locale alapján beállítjuk a
+    // pnv alapértelmezett régióját, ami a helyi formátumú számokhoz kell.
+    if (strlen(conf_root()->default_locale))
+        pnv_set_locale(pnv, conf_root()->default_locale);
+
+    // validálás
+    switch (pnv_validate(pnv)) {
+        case PNV_OK:
+            verbosef(2, "Phone number validation OK\n");
+            verbosef(2, "Phone number after convert: %s\n", pnv_get_phone_number_converted(pnv));
+            verbosef(2, "Provider: %s %s\n", pnv_get_msg_ok(pnv), pnv_get_locale(pnv));
+            return 0;
+
+        case PNV_FAIL:
+            verbosef(2, "Phone number validation FAIL\n");
+            quit(EXIT_ERR, "FAILED: %s\n", pnv_get_msg_fail(pnv));
+
+        case PNV_UNKNOWN:
+            verbosef(2, "Phone number maybe not valid: %s\n", pnv_get_msg_fail(pnv));
+            if (conf_root()->pnv == CONF_PNV_FORCE) {
+                printf("FAILED: %s\n", pnv_get_msg_fail(pnv));
+                return -1;
+            } else {
+                return 0;
+            }
+    }
+
+    return 0;
+}
+
+void got_sigalrm (int signum) {
+    quit(EXIT_AGAIN, "FAILED: timeout\n");
+}
+
 int main (int argc, char *argv[]) {
+    // absolute timeout
+    alarm(35);
+    signal(SIGALRM, got_sigalrm);
+
     // parse command-line arguments and save to option structure (in option.h)
     option_parse_args(argc, argv);
 
     // config file set to default
     conf_set_config_file(DEFAULT_CONFIG_FILE);
 
-    // config file set to SMSAMI_CONFIG environment variable, if exists
-    if (getenv("SMSAMI_CONFIG"))
-        conf_set_config_file(getenv("SMSAMI_CONFIG"));
+    // config file set to AMISMS_CONFIG environment variable, if exists
+    if (getenv("AMISMS_CONFIG"))
+        conf_set_config_file(getenv("AMISMS_CONFIG"));
 
     // config file set to argument, if specified --config option
     if (strlen(option.config))
@@ -136,6 +231,9 @@ int main (int argc, char *argv[]) {
     if (conf_load())
         return 1;
 
+    if (phone_number_validation())
+        return -1;
+
     if (selected_device == NULL)
         selected_device = conf_root()->default_device_name;
 
@@ -146,7 +244,7 @@ int main (int argc, char *argv[]) {
 
     ami = ami_new(EV_DEFAULT);
     if (ami == NULL) {
-        con_debug("ami_new() returned NULL");
+        printf("ami_new() returned NULL");
         return 1;
     }
 
@@ -159,6 +257,7 @@ int main (int argc, char *argv[]) {
 
     ami_event_register(ami, event_disconnect, NULL, "Disconnect");
     ami_event_register(ami, event_connect, NULL, "Connect");
+    verbosef(3, "Connecting to Asterisk ...\n");
     ami_connect(ami);
 
     ev_loop(EV_DEFAULT, 0);

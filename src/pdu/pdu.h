@@ -36,7 +36,7 @@ int set_numberformat(int *numberformat, char *number, int number_type);
 // flash_sms enables the flash flag.
 // mode select the pdu version (old or new).
 // if udh is true, then udh_data contains the optional user data header in hex dump, example: "05 00 03 AF 02 01"
-void make_pdu(char* number, char* message, int messagelen, int alphabet, int flash_sms, int report, int udh,
+void make_pdu(const char* number, char* message, int messagelen, int alphabet, int flash_sms, int report, int udh,
               char* udh_data, char* mode, char* pdu, int validity, int replace_msg, int system_msg, int number_type, char *smsc);
 
 // Splits a PDU string into the parts 

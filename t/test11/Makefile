@@ -1,12 +1,12 @@
 CC = gcc
 CFLAGS = -Wall 
-CFLAGS += -I../../libamievent
 CFLAGS += -I../../libamievent/libc-jss
 CFLAGS += -I../../src
 CFLAGS += -ggdb
 LDFLAGS = -lev -lm
 
-OBJ += ../../src/option.o ../../libamievent/libc-jss/misc.o ../../src/verbose.o
+OBJ += ../../libamievent/libc-jss/misc.o
+OBJ += ../../src/pnv.o
 PROGS=test
 
 CFLAGS += -DVERSION=\"test\"
@@ -21,4 +21,4 @@ clean:
 	rm -f *.o $(OBJ) $(PROGS)
 
 run:
-	./test --config=conf -f 12345 one two three four five >output
+	./test >output

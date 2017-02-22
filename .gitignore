@@ -2,3 +2,5 @@
 *.swp
 Session.vim
 /src/sms
+/src/phone_number_validator
+/src/pnv_json

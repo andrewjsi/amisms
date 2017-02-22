@@ -1,0 +1,4 @@
+# You can git diff this file
+
+- SMSAMI_CONFIG environment variable renamed to AMISMS_CONFIG
+

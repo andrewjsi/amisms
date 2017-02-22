@@ -22,6 +22,7 @@ Either version 2 of the License, or (at your option) any later version.
 #include "pdu.h"
 #include "compat.h"
 #include "charset.h" // required for conversions of partial text content.
+#include "../verbose.h"
 
 #define MAX_ADDRESS_LENGTH 50
 #define MAX_SMSC_ADDRESS_LENGTH 30
@@ -290,7 +291,27 @@ int set_numberformat(int *numberformat, char *number, int number_type)
 // mode select the pdu version (old or new).
 // if udh is true, then udh_data contains the optional user data header in hex dump, example: "05 00 03 AF 02 01"
 
-void make_pdu(char* number, char* message, int messagelen, int alphabet, int flash_sms, int report, int with_udh,
+
+static const char *get_alphabet_name (int alphabet) {
+    switch (alphabet) {
+        case ALPHABET_GSM:      return "ALPHABET_GSM";
+        case ALPHABET_ISO:      return "ALPHABET_ISO";
+        case ALPHABET_BINARY:   return "ALPHABET_BINARY";
+        case ALPHABET_UCS2:     return "ALPHABET_UCS2";
+        default:                return "UNDEFINED, internal error!";
+    }
+}
+
+static const char *get_numberformat_name (int numberformat) {
+    switch (numberformat) {
+        case NF_UNKNOWN:        return "NF_UNKNOWN";
+        case NF_INTERNATIONAL:  return "NF_INTERNATIONAL";
+        case NF_NATIONAL:       return "NF_NATIONAL";
+        default:                return "UNDEFINED, internal error!";
+    }
+}
+
+void make_pdu(const char* number, char* message, int messagelen, int alphabet, int flash_sms, int report, int with_udh,
               char* udh_data, char* mode, char* pdu, int validity, int replace_msg, int system_msg, int number_type, char *smsc)
 {
   int coding;
@@ -417,6 +438,10 @@ void make_pdu(char* number, char* message, int messagelen, int alphabet, int fla
       strcpy(pdu, "00");
     sprintf(strchr(pdu, 0), "%02X00%02X%02X%s%02X%02X%02X%02X", flags, numberlength, numberformat, tmp, proto, coding, validity, messagelen);
   }
+
+  verbosef(3, "PDU internals:\n");
+  verbosef(3, "  numberformat = %s\n", get_numberformat_name(numberformat));
+  verbosef(3, "      alphabet = %s\n", get_alphabet_name(alphabet));
 
   /* concatenate the text to the PDU string */
   strcat(pdu,tmp2);

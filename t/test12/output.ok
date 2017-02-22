@@ -1,0 +1,4 @@
+{"state": "PNV_OK", "provider": "T-Mobile", "invalidMsg": "", "revisedNumber": "+36301234567"}
+{"state": "PNV_FAIL", "provider": "", "invalidMsg": "kevés vagy sok számjegy", "revisedNumber": ""}
+{"state": "PNV_UNKNOWN", "provider": "", "invalidMsg": "helyi számot nem lehet vizsgálni ismeretlen régióban", "revisedNumber": ""}
+{"state": "PNV_OK", "provider": "Vodafone", "invalidMsg": "", "revisedNumber": "+36701234567"}

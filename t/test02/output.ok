@@ -1,4 +1,6 @@
 default = device0
+pnv = 0
+default-locale = hu
 
 device0
 	host     = localhost

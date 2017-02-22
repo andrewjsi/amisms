@@ -1,0 +1,29 @@
+STATE       NUM-ORIG       NUM-CONVERTED   COUNTRY              FAIL MSG   OK MSG    
+----------------------------------------------------------------------------------------
+PNV_OK      06201234567    +36201234567    Hungary              (null)     Telenor   
+PNV_OK      06301234567    +36301234567    Hungary              (null)     T-Mobile  
+PNV_OK      06701234567    +36701234567    Hungary              (null)     Vodafone  
+PNV_OK      06311234567    +36311234567    Hungary              (null)     Tesco mobile
+PNV_FAIL    0670123456     +3670123456     Hungary              kevés vagy sok számjegy (null)    
+PNV_FAIL    067012345678   +367012345678   Hungary              kevés vagy sok számjegy (null)    
+PNV_FAIL    0613095200     +3613095200     Hungary              nem mobil körzet (null)    
+PNV_FAIL    1717           1717            Hungary              emeltdíjas (null)    
+PNV_OK      1270           1270            Hungary              (null)     SMS szolgálatás
+PNV_FAIL    0680123456     +3680123456     Hungary              zöld szám (null)    
+PNV_FAIL    0690123456     +3690123456     Hungary              emeltdíjas (null)    
+PNV_UNKNOWN 06701234567    06701234567     (null)               helyi számot nem lehet vizsgálni ismeretlen régióban (null)    
+PNV_FAIL    +3620123456    +3620123456     Hungary              kevés vagy sok számjegy (null)    
+PNV_OK      +36201234567   +36201234567    Hungary              (null)     Telenor   
+PNV_FAIL    +06201234567   +06201234567    (null)               rossz nemzetközi formátum (null)    
+PNV_UNKNOWN +9999999999    +9999999999     (null)               országkód nem található (null)    
+PNV_FAIL    0620           +3620           Hungary              kevés számjegy (null)    
+PNV_FAIL    062            +362            Hungary              kevés számjegy (null)    
+PNV_FAIL    06             +36             Hungary              kevés számjegy (null)    
+PNV_FAIL    +              +               (null)               kevés számjegy (null)    
+PNV_FAIL    +362012+4567   +362012+4567    (null)               túl sok + karakter (null)    
+PNV_OK      36201234567    +36201234567    Hungary              (null)     Telenor   
+PNV_OK      201234567      +36201234567    Hungary              (null)     Telenor   
+PNV_OK      301234567      +36301234567    Hungary              (null)     T-Mobile  
+PNV_OK      311234567      +36311234567    Hungary              (null)     Tesco mobile
+PNV_OK      701234567      +36701234567    Hungary              (null)     Vodafone  
+PNV_OK      20 / 123 - 4567 +36201234567    Hungary              (null)     Telenor   

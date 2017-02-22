@@ -19,6 +19,7 @@
 #include "option.h"
 #include "misc.h"
 #include "debug.h"
+#include "verbose.h"
 
 #define DUMPI(e) fprintf(stderr, "%13s = %d\n", #e, option.e)
 #define DUMPS(e) fprintf(stderr, "%13s = \"%s\"\n", #e, option.e)
@@ -28,7 +29,6 @@ void option_dump () {
     DUMPI(flash);
     DUMPI(help);
     DUMPI(stdin);
-    DUMPI(verbose);
     DUMPS(message_text);
     DUMPS(phone_number);
 }
@@ -38,6 +38,7 @@ static struct option longopts[] = { // please :sort this table after modify
     {"config",      required_argument,  0,                  'c'},
     {"flash",       no_argument,        0,                  'f'},
     {"help",        no_argument,        0,                  'h'},
+    {"nopnv",       no_argument,        &option.nopnv,        1},
     {"stdin",       no_argument,        0,                  's'},
     {"verbose",     no_argument,        0,                  'v'},
     {0, 0, 0, 0}
@@ -70,7 +71,7 @@ void option_print_usage (char *fmt, ...) {
         fprintf(stderr, "\n");
         va_end(ap);
     }
-    exit(1);
+    exit(-1);
 }
 
 void option_print_help (char *fmt, ...) {
@@ -87,12 +88,13 @@ void option_print_help (char *fmt, ...) {
         printf("  or   sms [OPTIONS] <phone number> [message text]\n");
         printf("\n");
         printf("Options\n");
-        printf(" -v, --verbose               verbose output to stderr\n");
+        printf(" -v, -vv, -vvv               increase verbosity level\n");
         printf(" -f, --flash                 flash SMS\n");
         printf(" -s, --stdin                 read message text from stdin\n");
         printf(" -c, --config                config file (default: %s)\n", DEFAULT_CONFIG_FILE);
+        printf("     --nopnv                 skip phone number validation\n");
     }
-    exit(1);
+    exit(-1);
 }
 
 int option_parse_args (int argc, char *argv[]) {
@@ -112,6 +114,16 @@ int option_parse_args (int argc, char *argv[]) {
             break;
 
         switch (c) {
+            case 0:
+                /* If this option set a flag, do nothing else now. */
+                if (longopts[option_index].flag != 0)
+                    break;
+                printf ("option %s", longopts[option_index].name);
+                if (optarg)
+                    printf (" with arg %s", optarg);
+                printf ("\n");
+                break;
+
             case 'c':
                 scpy(option.config, optarg);
                 break;
@@ -129,7 +141,7 @@ int option_parse_args (int argc, char *argv[]) {
                 break;
 
             case 'v':
-                option.verbose++;
+                verbose_inc_level();
                 break;
 
             case '?':
@@ -178,7 +190,7 @@ int option_parse_args (int argc, char *argv[]) {
         }
     } else {
         // read from stdin
-        printf("Text? (press control+d to send)\n");
+        verbosef(1, "Text? (press control+d to send)\n");
         option.message_text[0] = '\0';
         read_lines_from_stdin(option.message_text, sizeof(option.message_text));
     }

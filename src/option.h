@@ -17,8 +17,8 @@ struct option_t {
     char config[128];
     int help;
     int flash;
-    int verbose;
     int stdin;
+    int nopnv;
 };
 
 // this variable holds the all options

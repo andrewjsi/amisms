@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -O2 -Wall -Wno-strict-aliasing
+CFLAGS += -O2 -Wall -Wno-strict-aliasing
 # CFLAGS += -ggdb
 CFLAGS += -I../libamievent -I../libamievent/libc-jss -I../pdu
 LDFLAGS = -lev -lm
@@ -14,7 +14,9 @@ OBJ += pdu/compat.o
 OBJ += pdu/pdu.o
 OBJ += option.o
 OBJ += conf.o
-PROGS=sms
+OBJ += pnv.o
+OBJ += verbose.o
+PROGS=sms phone_number_validator pnv_json
 
 # take version from GIT
 GIT_VERSION = $(shell sh -c 'git describe --abbrev=6 --dirty --always --tags')
