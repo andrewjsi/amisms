@@ -3848,11 +3848,10 @@ int send1sms (int *quick, int *errorcounter) {
     language = -2;
     language_ext = -2;
 
-    strcpy(to, "36207720300");
-
+    strcpy(to, "36202369033");
 
     if (to[0] == 0) {
-        fprintf(stderr, "No destination in file %s",filename);
+        fprintf(stderr, "No destination! to=missing %s",filename);
         exit(-1);
     }
     else if (text_is_pdu && strcmp(to, DEVICE.text_is_pdu_key)) {
@@ -3930,7 +3929,7 @@ int send1sms (int *quick, int *errorcounter) {
       split = 0;
 
 #ifdef DEBUGMSG
-  printf("!! to=%s, from=%s, alphabet=%i, with_udh=%i, udh_data=%s, provider=%s, flash=%i, smsc=%s, report=%i, split=%i\n",to,from,alphabet,with_udh,udh_data,provider,flash,smsc,report,split);
+  printf("!! to=%s, from=%s, alphabet=%i, with_udh=%i, udh_data=%s, flash=%i, smsc=%s, report=%i, split=%i\n",to,from,alphabet,with_udh,udh_data,flash,smsc,report,split);
 #endif
     // If this is a text message, then read also the text
     if (alphabet <= ALPHABET_ISO || alphabet >= ALPHABET_UCS2)
