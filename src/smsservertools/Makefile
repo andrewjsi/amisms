@@ -30,7 +30,7 @@ CFLAGS += -D NOSTATS
 CFLAGS += -ggdb -O0
 
 # The following option is only used by developers
-# CFLAGS += -D DEBUGMSG
+CFLAGS += -D DEBUGMSG
 
 CFLAGS += -W -Wall
 
