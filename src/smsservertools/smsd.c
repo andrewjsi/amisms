@@ -3432,7 +3432,7 @@ int send_part(char* from, char* to, char* text, int textlen, int alphabet, int w
     *error_text = 0;
   start_time = time(0);
   // Mark modem as sending
-  STATISTICS->status = 's';
+  // STATISTICS->status = 's';
 
   if (text_is_pdu)
   {
@@ -3448,40 +3448,6 @@ int send_part(char* from, char* to, char* text, int textlen, int alphabet, int w
   // 3.1beta7: Now logged only if a message file contained Report:yes.
   if (report == 1 && !DEVICE.incoming)
     writelogfile(LOG_NOTICE, 0, "Cannot receive status report because receiving is disabled");
-
-  if ((quick==0 || (*smsc && !DEVICE.smsc_pdu)) && DEVICE.sending_disabled == 0)
-  {
-    int i;
-
-    i = initialize_modem_sending(smsc);
-    if (i)
-    {
-      STATISTICS->usage_s+=time(0)-start_time;
-
-      flush_smart_logging();
-
-      return (i == 7)? 3 : 1;
-    }
-  }
-  else
-  {
-    // 3.1:
-    if (DEVICE.sending_disabled == 0 && DEVICE.check_network)
-    {
-      switch (wait_network_registration(1, 100))
-      {
-        case -1:
-          STATISTICS->usage_s+=time(0)-start_time;
-          flush_smart_logging();
-          return 1;
-
-        case -2:
-          STATISTICS->usage_s+=time(0)-start_time;
-          flush_smart_logging();
-          return 3;
-      }
-    }
-  }
 
   if (!text_is_pdu)
     make_pdu(to, text, textlen, alphabet, flash, report, with_udh, udh_data, DEVICE.mode, pdu,
@@ -3946,7 +3912,13 @@ int send1sms (int *quick, int *errorcounter) {
 #endif
 
     do_convert = DEVICE.cs_convert && alphabet == ALPHABET_ISO && language == -2 && language_ext == -2;
-    readSMStext(filename, 0, do_convert, text, &textlen, macros, &charconv_notice);
+
+    // AMISMS PARAM TEXT
+    // text initialisation
+    strcpy(text, "Hello from smsd.c");
+    textlen = strlen(text);
+    // readSMStext(filename, 0, do_convert, text, &textlen, macros, &charconv_notice);
+
     if (do_convert)
       alphabet = ALPHABET_GSM;
 
