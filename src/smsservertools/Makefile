@@ -27,7 +27,7 @@ CFLAGS += -D NOSTATS
 #CFLAGS += -D PRINT_NATIONAL_LANGUAGE_SHIFT_TABLES
 
 # Uncomment to add debug info
-# CFLAGS += -ggdb -O0
+CFLAGS += -ggdb -O0
 
 # The following option is only used by developers
 # CFLAGS += -D DEBUGMSG
